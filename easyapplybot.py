@@ -307,11 +307,11 @@ class EasyApplyBot:
         company = re_extract(browserTitle.split(' | ')[1], r"(\w.*)")
 
         toWrite: list = [timestamp, jobID, job, company, attempted, result]
-        file_exists = os.path.exists(self.filename)
-        with open(self.filename, 'a') as f:
+        # file_exists = os.path.exists(self.filename)
+        with open(self.filename, 'a', newline='') as f:
             writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(['Timestamp', 'Job ID', 'Job', 'Company', 'Attempted', 'Result'])
+            # if not file_exists:
+            #     writer.writerow(['Timestamp', 'Job ID', 'Job', 'Company', 'Attempted', 'Result'])
             writer.writerow(toWrite)
 
     def get_job_page(self, jobID):
@@ -589,4 +589,14 @@ if __name__ == '__main__':
 
     locations: list = [l for l in parameters['locations'] if l != None]
     positions: list = [p for p in parameters['positions'] if p != None]
-    bot.start_apply(positions, locations)
+    try:
+        bot.start_apply(positions, locations)
+        log.info("Finished applying to all jobs! Restarting...")
+        os.system('py easyapplybot.py')
+    except Exception as e:
+        # send an email notification
+
+        log.info(e)
+        log.info("Exception occured, restarting the script")
+
+        os.system('py easyapplybot.py')
